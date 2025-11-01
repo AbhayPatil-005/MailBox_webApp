@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { Form, Button, Container, Card, Col, Row } from "react-bootstrap";
+import { Form, Button, Container, Card, Col, Row, Alert, Spinner } from "react-bootstrap";
 
 const SignUpPage = () => {
 
     const API_KEY = import.meta.env.VITE_FIREBASE_AUTH_API_KEY;
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+    const [loading, setLoading] = useState("");
     const [formData, setFormData] = useState({
         email: "",
         password: "",
@@ -11,18 +14,28 @@ const SignUpPage = () => {
     });
 
     const handleChange = (e) => {
-        e.preventDefault();
         const {name, value} = e.target;
         setFormData({...formData, [name]:value})
+        setError("");
+        setSuccess("");
     }
 
     const handleSubmit= async(e)=>{
         e.preventDefault();
+        const errorMap = {
+            EMAIL_EXISTS: "This email is already registered.",
+            INVALID_EMAIL: "Please enter a valid email address.",
+            TOO_MANY_ATTEMPTS_TRY_LATER: "You have attempted to many times, please try again later!"
+        }
+        setError("");
+        setSuccess("");
 
         if(formData.password!== formData.confirmPassword){
-            alert("Passwords do not match!");
+            setError("Passwords do not match!");
+            setFormData({...formData, confirmPassword:""});
             return;
         }
+        setLoading(true);
         try{
             const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY} `,{
                 method:'POST',
@@ -31,24 +44,26 @@ const SignUpPage = () => {
                     email:formData.email,
                     password: formData.password,
                     returnSecureToken:true,
-                })
-                
+                }),      
             })
             const data = await response.json();
             if(!response.ok){
-                throw new error(data.error.message)
-            }else{
-                console.log("User Successfully registered")
+                setLoading(false);
+                throw new Error(data.error.message);
             }
-            
+            setSuccess("User Successfully registered");
+            setFormData({email: "", password: "", confirmPassword: "",});
+            setTimeout(()=>setSuccess(""), 3000);
+            //redirect to homepage
+              
         }catch(err){
+            const readError = (errorMap[err.message] || "Authentication failed due to some reasons, please try again!")
+            setError(readError)
+            setTimeout(() => setError(""), 3000);
             console.error("Failed to post auth details: ",err)
+        }finally{
+            setLoading(false);
         }
-        setFormData({
-            email: "",
-            password: "",
-            confirmPassword: "",
-        })
     }
 
     return (<>
@@ -58,6 +73,10 @@ const SignUpPage = () => {
                     <Card className=" shadow-sm border w-100">
                         <h3 className="text-center p-3 m-0 bg-dark text-white">Sign Up</h3>
                         <Form className="p-4" onSubmit={handleSubmit}>
+
+                            {error && <Alert variant="danger">{error}</Alert>}
+                            {success && <Alert variant="success">{success}</Alert>}
+
                             <Form.Group className="mb-3" controlId="email">
                                 <Form.Label>Email</Form.Label>
                                 <Form.Control
@@ -94,8 +113,8 @@ const SignUpPage = () => {
                                 />
                             </Form.Group>
 
-                            <Button type="submit" variant="success" className="w-100">
-                                Submit
+                            <Button type="submit" variant="success" className="w-100" disabled={loading}>
+                                {loading ? <Spinner size="sm" animation="border" /> : "Submit"}
                             </Button>
                         </Form>
                     </Card>
