@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Form, Button, Container, Card, Col, Row, Alert, Spinner } from "react-bootstrap";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const SignUpPage = () => {
 
@@ -12,6 +13,7 @@ const SignUpPage = () => {
         password: "",
         confirmPassword: "",
     });
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const {name, value} = e.target;
@@ -54,7 +56,7 @@ const SignUpPage = () => {
             setSuccess("User Successfully registered");
             setFormData({email: "", password: "", confirmPassword: "",});
             setTimeout(()=>setSuccess(""), 3000);
-            //redirect to homepage
+            navigate("/login")
               
         }catch(err){
             const readError = (errorMap[err.message] || "Authentication failed due to some reasons, please try again!")
@@ -71,7 +73,7 @@ const SignUpPage = () => {
             <Row className="w-100 justify-content-center">
                 <Col xs={10} sm={8} md={5} lg={4}>
                     <Card className=" shadow-sm border w-100">
-                        <h3 className="text-center p-3 m-0 bg-dark text-white">Sign Up</h3>
+                        <h3 className="text-center p-3 m-0 bg-dark text-white rounded-top-2 ">Sign Up</h3>
                         <Form className="p-4" onSubmit={handleSubmit}>
 
                             {error && <Alert variant="danger">{error}</Alert>}
@@ -80,10 +82,10 @@ const SignUpPage = () => {
                             <Form.Group className="mb-3" controlId="email">
                                 <Form.Label>Email</Form.Label>
                                 <Form.Control
-                                    type="email"
                                     name="email"
                                     placeholder="Enter email"
                                     value={formData.email}
+                                    type="email"
                                     onChange={handleChange}
                                     required
                                 />
@@ -118,6 +120,7 @@ const SignUpPage = () => {
                             </Button>
                         </Form>
                     </Card>
+                    <Alert className="mt-3 shadow-sm text-center" variant="primary">Have an account? <NavLink to="/login">login</NavLink></Alert>
                 </Col>
             </Row>
         </Container>
