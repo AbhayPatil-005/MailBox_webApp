@@ -1,8 +1,8 @@
-import { useState } from 'react'
+
 import SignUpPage from './pages/Auth/SignUpPage';
 import LoginPage from './pages/Auth/LoginPage';
 import HomePage from './pages/HomePage';
-import { Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 function App() {

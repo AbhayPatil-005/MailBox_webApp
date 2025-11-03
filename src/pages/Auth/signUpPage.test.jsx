@@ -1,6 +1,6 @@
-import {render, screen, fireEvent, waitFor} from "@testing-library/react";
+import {render, screen, fireEvent} from "@testing-library/react";
 import SignUpPage from "./SignUpPage";
-import '@testing-library/jest-dom';
+import { afterEach, beforeEach } from "vitest";
 
 beforeEach(()=>{
     global.fetch = vi.fn();
@@ -9,7 +9,7 @@ afterEach(()=>{
     vi.restoreAllMocks();
 });
 
-test("renders from inputs and submit button", ()=>{
+test("renders form inputs and submit button", ()=>{
     render(<SignUpPage/>);
     expect(screen.getByPlaceholderText(/email/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/^password$/i)).toBeInTheDocument();
