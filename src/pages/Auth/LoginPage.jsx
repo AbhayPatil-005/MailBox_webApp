@@ -46,7 +46,8 @@ const LoginPage=()=>{
         if(!response.ok){
             throw new Error(data.error.message || "Authentication failed")
         }
-        dispatch(login({token:data.idToken, userId:data.localId}));
+        console.log(data)
+        dispatch(login({token: data.idToken, userId: data.localId, userEmail: data.email}));
         setSuccess("Login Successful");
         setTimeout(()=>setSuccess(""),3000)
         
