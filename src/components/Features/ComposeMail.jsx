@@ -1,4 +1,4 @@
-import { Card, Toast, ToastContainer, ToastBody, Form, Button, Spinner } from "react-bootstrap";
+import { Card, Toast, ToastContainer, Form, Button, Spinner } from "react-bootstrap";
 import { useState } from "react";
 import FroalaEditorComponent from "react-froala-wysiwyg";
 import "froala-editor/js/plugins.pkgd.min.js";
@@ -13,7 +13,7 @@ const ComposeMail = () => {
         subject: "",
         body: "",
     })
-    const BASE_URL = import.meta.env.VITE_FIREBASE_BASE_URL
+    const BASE_URL = import.meta.env.VITE_FIREBASE_BASE_URL;
     const [sending, setSending] = useState(false);
     const [toast, setToast] = useState({
         show: false,
@@ -43,6 +43,7 @@ const ComposeMail = () => {
                 to: formData.to,
                 subject: formData.subject,
                 body: formData.body,
+                date:new Date().toISOString(),
                 read: false,
             }
 
@@ -86,7 +87,7 @@ const ComposeMail = () => {
                 </Toast>
             </ToastContainer>
             <div className="d-flex justify-content-center">
-                <Card className="m-3 p-3 shadow rounded-0 w-75 justify-content-center">
+                <Card className=" p-3 shadow rounded-0  justify-content-center">
                     <Form onSubmit={handleSendEvent}>
                         <Form.Group controlId="toEmail" className="d-flex align-items-center gap-2">
                             <Form.Control
