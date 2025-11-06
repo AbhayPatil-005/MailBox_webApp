@@ -100,12 +100,10 @@ const ComposeMail = () => {
                                 required
                                 disabled={sending}
                             />
-                            {formData.to === "" && (
-                                <small className="text-danger">Recipient email required</small>
-                            )}
-
                         </Form.Group>
-
+                        {formData.to === "" && (
+                                <small className="text-danger ms-2">Recipient email required</small>
+                            )}
                         <Form.Group controlId="subject" className="mt-2">
                             <Form.Control
                                 type="text"

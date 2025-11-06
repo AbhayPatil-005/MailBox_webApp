@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Toast, ToastContainer, ListGroup, Spinner, Badge } from "react-bootstrap";
+import { useNavigate, useOutletContext } from "react-router-dom";
 
 const InboxView = () => {
     const BASE_URL = import.meta.env.VITE_FIREBASE_BASE_URL;
     const email = useSelector((state) => state.auth.userEmailId);
     const safeEmail = email.replace(/\./g, ",");
+
+    const navigate = useNavigate();
+    const {setUnreadCount} = useOutletContext();
 
     const [mails, setMails] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -25,6 +29,8 @@ const InboxView = () => {
                     ...data[key],
                 }));
                 setMails(formatted.reverse());
+                const unread = formatted.filter(mail => !mail.read).length;
+                setUnreadCount(unread);
             }
         } catch (error) {
             setToast({
@@ -37,8 +43,12 @@ const InboxView = () => {
     useEffect(() => {
         fetchInbox();
     }, []);
-    if (loading) return <Spinner className="m-5" />
-
+    if (loading)
+        return (
+            <div className="d-flex justify-content-center align-items-center" style={{ height: "80vh" }}>
+                <Spinner animation="border" variant="primary" />
+            </div>)
+    ;
     return (<>
         <ToastContainer position="top-end" className="mt-3">
             <Toast
@@ -62,8 +72,9 @@ const InboxView = () => {
                             <ListGroup.Item
                                 key={mail.id}
                                 className="d-flex justify-content-between align-items-center"
+                                onClick={() => navigate(`/home/mail/${mail.id}`)}
                             >
-                                <div>
+                                <div style={{ cursor: "pointer" }}>
                                     {!mail.read && (
                                         <span className="me-2 text-primary fw-bold">💠</span>
                                     )}
