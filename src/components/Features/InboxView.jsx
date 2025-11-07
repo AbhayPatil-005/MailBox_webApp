@@ -42,7 +42,7 @@ const InboxView = () => {
     }
 
     const handleDelete = async (mailId) => {
-        try {const res = await fetch(`${BASE_URL}/mails/${safeEmail}/inbox/${mailId}.json`,{
+        try {await fetch(`${BASE_URL}/mails/${safeEmail}/inbox/${mailId}.json`,{
             method:"DELETE",
         });
         setMails((prev)=>prev.filter((mail)=>mail.id!==mailId));
@@ -86,7 +86,7 @@ const InboxView = () => {
                             <ListGroup.Item
                                 key={mail.id}
                                 className="d-flex justify-content-between align-items-center"
-                                onClick={() => navigate(`/home/mail/${mail.id}`)}
+                                onClick={() => navigate(`/home/inbox/mail/${mail.id}`)}
                             >
                                 <div style={{ cursor: "pointer" }}>
                                     {!mail.read && (

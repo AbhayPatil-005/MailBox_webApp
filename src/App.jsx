@@ -1,4 +1,4 @@
-
+import SentView from './components/Features/SentView';
 import SignUpPage from './pages/Auth/SignUpPage';
 import LoginPage from './pages/Auth/LoginPage';
 import HomePage from './pages/HomePage';
@@ -22,8 +22,10 @@ function App() {
 
           <Route index element={<InboxView />}/>
           <Route path='inbox' element={<InboxView />} />
+          <Route path='sent' element={<SentView/>}/>
           <Route path='compose' element={<ComposeMail />} />
-          <Route path="mail/:id" element={<ReadMail />} />
+          <Route path="inbox/mail/:id" element={<ReadMail type="inbox"/>} />
+          <Route path="sent/mail/:id" element={<ReadMail type="sent"/>}/> 
         </Route>
 
         <Route path='*' element={<Navigate to="/login" replace/>}/>
@@ -33,4 +35,4 @@ function App() {
   )
 }
 
-export default App
+export default App;

@@ -5,7 +5,7 @@ import { Toast, ToastContainer, Card, Spinner, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 
-const ReadMail = () => {
+const ReadMail = ({type}) => {
 
     const { id } = useParams();
     const navigate = useNavigate();
@@ -23,11 +23,11 @@ const ReadMail = () => {
         const fetchMail = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`${BASE_URL}/mails/${safeEmail}/inbox/${id}.json`);
+                const response = await fetch(`${BASE_URL}/mails/${safeEmail}/${type}/${id}.json`);
                 const data = await response.json();
                 setMail(data);
 
-                if (!data.read) {
+                if (type === "inbox" && !data.read) {
                     await fetch(`${BASE_URL}/mails/${safeEmail}/inbox/${id}.json`, {
                         method: 'PATCH',
                         headers: { 'Content-type': 'application/json' },
@@ -44,7 +44,7 @@ const ReadMail = () => {
             }
         }
         fetchMail();
-    }, [id])
+    }, [id, type])
 
     if (loading) return <div
         className="d-flex justify-content-center align-items-center" style={{ height: "80vh" }}>
@@ -56,8 +56,8 @@ const ReadMail = () => {
         <Button
             variant="transparent"
             className="mb-3 shadow-sm"
-            onClick={() => navigate("/home/inbox")}
-        >← Back to Inbox</Button>
+            onClick={() => navigate(`/home/${type}`)}
+        >← Back to {type}</Button>
 
         <ToastContainer position="top-end" className="m-3">
             <Toast
@@ -71,7 +71,8 @@ const ReadMail = () => {
         <Card className="p-4 shadow-sm border-0">
             <h4>{mail.subject}</h4>
             <p className="text-muted mb-2">
-                <strong>From:</strong> {mail.from}
+                <strong>{type === "inbox" ? "From" : "To"}: </strong> 
+                {type === "inbox" ? mail.from : mail.to}
             </p>
             <hr />
             <div dangerouslySetInnerHTML={{ __html: mail.body }} />

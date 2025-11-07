@@ -25,7 +25,12 @@ const SideBar=({unreadCount})=>{
               {unreadCount}
             </Badge>
           )}</ListGroup.Item>
-        <ListGroup.Item as={Link} to="/home/sent" active={pathname.includes("sent")} action>Sent</ListGroup.Item>
+        <ListGroup.Item 
+          as={Link} to="/home/sent" 
+          active={pathname.includes("sent")} 
+          variant="secondary"
+          action
+          >Sent</ListGroup.Item>
       </ListGroup>
     </div>)
 }

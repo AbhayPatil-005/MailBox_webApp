@@ -76,7 +76,7 @@ const ComposeMail = () => {
 
     return (
         <>
-            <ToastContainer position="top-end">
+            <ToastContainer position="top-center" className="m-3 mt-1 text-center shadow-sm border rounded">
                 <Toast
                     bg={toast.variant}
                     show={toast.show}
@@ -86,8 +86,8 @@ const ComposeMail = () => {
                     <Toast.Body className={toast.textColor}>{toast.message}</Toast.Body>
                 </Toast>
             </ToastContainer>
-            <div className="d-flex justify-content-center">
-                <Card className=" p-3 shadow rounded-0  justify-content-center">
+            <div  className="d-flex justify-content-center">
+                <Card bg="light" className=" p-3 m-auto rounded-0  justify-content-center">
                     <Form onSubmit={handleSendEvent}>
                         <Form.Group controlId="toEmail" className="d-flex align-items-center gap-2">
                             <Form.Control
@@ -102,7 +102,7 @@ const ComposeMail = () => {
                             />
                         </Form.Group>
                         {formData.to === "" && (
-                                <small className="text-danger ms-2">Recipient email required</small>
+                                <small className="text-secondary fst-italic ms-2">Recipient email required</small>
                             )}
                         <Form.Group controlId="subject" className="mt-2">
                             <Form.Control
@@ -115,7 +115,7 @@ const ComposeMail = () => {
                                 disabled={sending}
                             />
                             {formData.subject === "" && (
-                                <small className="text-danger ms-2">subject required</small>
+                                <small className="text-secondary fst-italic ms-2">subject required</small>
                             )}
                         </Form.Group>
 
