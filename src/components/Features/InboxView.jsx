@@ -17,8 +17,8 @@ const InboxView = () => {
         show: false, variant: "", message: "", textColor: ""
     })
 
-    const fetchInbox = async () => {
-        setLoading(true)
+    const fetchInbox = async (showLoading = false) => {
+        if (showLoading) setLoading(true);
         try {
             const res = await fetch(`${BASE_URL}/mails/${safeEmail}/inbox.json`);
             const data = await res.json();
@@ -28,33 +28,40 @@ const InboxView = () => {
                     id: key,
                     ...data[key],
                 }));
-                setMails(formatted.reverse());
-                const unread = formatted.filter(mail => !mail.read).length;
-                setUnreadCount(unread);
+                const isSame = JSON.stringify(formatted) === JSON.stringify(mails);
+                if (!isSame) {
+                    const reversed = formatted.reverse();
+                    setMails(reversed);
+                    const unread = formatted.filter(mail => !mail.read).length;
+                    setUnreadCount(unread);
+                }
             }
         } catch (error) {
             setToast({
                 show: true, message: "Failed to load the mails", variant: "danger", textColor: "text-white"
             })
         } finally {
-            setLoading(false)
+            if(showLoading)setLoading(false);
         }
     }
 
     const handleDelete = async (mailId) => {
-        try {await fetch(`${BASE_URL}/mails/${safeEmail}/inbox/${mailId}.json`,{
-            method:"DELETE",
-        });
-        setMails((prev)=>prev.filter((mail)=>mail.id!==mailId));
-        setToast({show:true, message:"Mail deleted successfully", variant:"success", textColor:"text-white"});
+        try {
+            await fetch(`${BASE_URL}/mails/${safeEmail}/inbox/${mailId}.json`, {
+                method: "DELETE",
+            });
+            setMails((prev) => prev.filter((mail) => mail.id !== mailId));
+            setToast({ show: true, message: "Mail deleted successfully", variant: "success", textColor: "text-white" });
         } catch (error) {
-            setToast({show:true, message:"Failed to delete Mail, check internet connection!", variant:"danger", textColor:"text-white"});
+            setToast({ show: true, message: "Failed to delete Mail, check internet connection!", variant: "danger", textColor: "text-white" });
             console.log(error.message)
         };
     };
 
     useEffect(() => {
-        fetchInbox();
+        fetchInbox(true);
+        const interval = setInterval(fetchInbox, 2000);
+        return () => clearInterval(interval);
     }, []);
 
     if (loading)
@@ -62,7 +69,7 @@ const InboxView = () => {
             <div className="d-flex justify-content-center align-items-center" style={{ height: "80vh" }}>
                 <Spinner animation="border" variant="primary" />
             </div>);
-            
+
     return (<>
         <ToastContainer position="top-end" className="mt-3">
             <Toast
