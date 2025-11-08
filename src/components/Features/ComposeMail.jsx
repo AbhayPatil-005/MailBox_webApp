@@ -4,16 +4,19 @@ import FroalaEditorComponent from "react-froala-wysiwyg";
 import "froala-editor/js/plugins.pkgd.min.js";
 import "froala-editor/css/froala_editor.pkgd.min.css";
 import "froala-editor/css/froala_style.min.css";
-import { useSelector } from "react-redux"; // to access sender email later
+import { useSelector } from "react-redux";
+import useMailApi from "../../hooks/useMailApi";
 
 
 const ComposeMail = () => {
+
     const [formData, setFormData] = useState({
         to: "",
         subject: "",
         body: "",
     })
     const BASE_URL = import.meta.env.VITE_FIREBASE_BASE_URL;
+    const { sendMail } = useMailApi(BASE_URL);
     const [sending, setSending] = useState(false);
     const [toast, setToast] = useState({
         show: false,
@@ -30,34 +33,26 @@ const ComposeMail = () => {
 
         const isEmail = /\S+@\S+\.\S+/;
         if (!isEmail.test(formData.to)) {
-           return setToast({
+            return setToast({
                 show: true, message: "Invalid email address", variant: "danger", textColor: "text-white",
             });
         }
+        const safeSender = senderEmail.replace(/\./g, ",");
+        const safeReceiver = formData.to.replace(/\./g, ",");
+        const mailData = {
+            from: senderEmail,
+            to: formData.to,
+            subject: formData.subject,
+            body: formData.body,
+            date: new Date().toISOString(),
+            read: false,
+        }
+
         try {
             setSending(true);
-            const safeSender = senderEmail.replace(/\./g, ",");
-            const safeReceiver = formData.to.replace(/\./g, ",");
-            const mailData = {
-                from: senderEmail,
-                to: formData.to,
-                subject: formData.subject,
-                body: formData.body,
-                date:new Date().toISOString(),
-                read: false,
-            }
 
-            await fetch(`${BASE_URL}/mails/${safeSender}/sent.json`, {
-                method: "POST",
-                body: JSON.stringify(mailData),
-                headers: { 'Content-type': 'application/json' },
-            });
-
-            await fetch(`${BASE_URL}/mails/${safeReceiver}/inbox.json`, {
-                method: "POST",
-                body: JSON.stringify(mailData),
-                headers: { 'Content-type': 'application/json' },
-            });
+            await sendMail(`mails/${safeSender}/sent`, mailData);
+            await sendMail(`mails/${safeReceiver}/inbox`, mailData);
 
             setToast({
                 show: true, message: "Email sent successfully", variant: "success", textColor: "text-white"
@@ -86,7 +81,7 @@ const ComposeMail = () => {
                     <Toast.Body className={toast.textColor}>{toast.message}</Toast.Body>
                 </Toast>
             </ToastContainer>
-            <div  className="d-flex justify-content-center">
+            <div className="d-flex justify-content-center">
                 <Card bg="light" className=" p-3 m-auto rounded-0  justify-content-center">
                     <Form onSubmit={handleSendEvent}>
                         <Form.Group controlId="toEmail" className="d-flex align-items-center gap-2">
@@ -102,8 +97,8 @@ const ComposeMail = () => {
                             />
                         </Form.Group>
                         {formData.to === "" && (
-                                <small className="text-secondary fst-italic ms-2">Recipient email required</small>
-                            )}
+                            <small className="text-secondary fst-italic ms-2">Recipient email required</small>
+                        )}
                         <Form.Group controlId="subject" className="mt-2">
                             <Form.Control
                                 type="text"
@@ -130,7 +125,7 @@ const ComposeMail = () => {
                                 disabled={sending}
                             />
                         </Form.Group>
-                        <Button variant="primary" style={{ minWidth: "90px" }} type="submit" className="mt-3 ms-auto d-block w-20" disabled={sending}>{sending ? <Spinner size="sm" animation="border" />  : "Send"}</Button>
+                        <Button variant="primary" style={{ minWidth: "90px" }} type="submit" className="mt-3 ms-auto d-block w-20" disabled={sending}>{sending ? <Spinner size="sm" animation="border" /> : "Send"}</Button>
                     </Form>
                 </Card>
             </div>

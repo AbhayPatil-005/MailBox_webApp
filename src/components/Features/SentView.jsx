@@ -1,49 +1,34 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Toast, ToastContainer, ListGroup, Spinner, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import useFetch from "../../hooks/useFetch";
 
 const SentView = () => {
     const BASE_URL = import.meta.env.VITE_FIREBASE_BASE_URL;
     const email = useSelector((state) => state.auth.userEmailId);
-    const safeEmail = email.replace(/\./g, ",");
+    const safeEmail = email ? email.replace(/\./g, ",") : "";
 
     const navigate = useNavigate();
-
-    const [mails, setMails] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const {mails, loading, error, refetch} = useFetch(`${BASE_URL}/mails/${safeEmail}/sent.json`);
     const [toast, setToast] = useState({
         show: false, message: "", variant: "", textColor: ""
     });
 
-    const fetchSent = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch(`${BASE_URL}/mails/${safeEmail}/sent.json`);
-            const data = await res.json();
-
-            if (data) {
-                const formatted = Object.keys(data).map(key => ({
-                    id: key,
-                    ...data[key],
-                }));
-                setMails(formatted.reverse());
-            }
-        } catch (error) {
-            setToast({
-                show: true, message: "Failed to load the mails", variant: "danger", textColor: "text-white"
-            });
-        } finally {
-            setLoading(false)
-        }
-    }
+    const sentMails = useMemo(()=>{
+        if(!mails)return[];
+        return Object.keys(mails)
+            .filter((key)=>mails[key]!==null)
+            .map((key)=>({id:key, ...mails[key]}))
+            .reverse();
+    }, [mails]);
 
     const handleDelete = async (mailId) => {
         try {
             await fetch(`${BASE_URL}/mails/${safeEmail}/sent/${mailId}.json`, {
                 method: "DELETE",
             });
-            setMails((prev) => prev.filter((mail) => mail.id !== mailId));
+            refetch();
             setToast({ show: true, message: "Mail deleted successfully", variant: "success", textColor: "text-white" });
         } catch (error) {
             setToast({ show: true, message: "Failed to delete Mail, check internet connection!", variant: "danger", textColor: "text-white" });
@@ -51,15 +36,16 @@ const SentView = () => {
         };
     };
 
-    useEffect(() => {
-        fetchSent();
-    }, []);
-
     if (loading)
         return (
             <div className="d-flex justify-content-center align-items-center" style={{ height: "80vh" }}>
                 <Spinner animation="border" variant="primary" />
             </div>);
+
+    if(error)
+        return(<div className="text-center mt-5 text-danger">
+        <p className="text-danger fw-semibold">⚠️ Failed to load mails: {error}</p>
+      </div>);
     return (
         <>
             <ToastContainer position="top-end" className="mt-3">
@@ -76,10 +62,10 @@ const SentView = () => {
                 <h4 className="mb-3">Sent</h4>
 
                 <div className="flex-grow-1 border rounded p-2 bg-white">
-                    {mails.length === 0 && <p>0 mails sent</p>}
+                    {sentMails.length === 0 && <p className="m-2 text-center">No sent mails to see 📭</p>}
                     <div style={{ maxHeight: "500px", overflowY: "auto" }}>
                         <ListGroup>
-                            {mails.map((mail) => (
+                            {sentMails.map((mail) => (
                                 <ListGroup.Item
                                     className="d-flex justify-content-between align-items-center"
                                     key={mail.id}
@@ -89,7 +75,7 @@ const SentView = () => {
                                         <strong>{mail.to}</strong> — {mail.subject}
                                     </div>
 
-                                    <small className="ms-auto">
+                                    <small className="ms-auto text-muted">
                                         {mail.date ? new Date(mail.date).toLocaleDateString() : ""}
                                     </small>
                                     <Button

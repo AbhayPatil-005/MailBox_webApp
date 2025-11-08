@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { Toast, ToastContainer, Card, Spinner, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-
+import useMailApi from "../../hooks/useMailApi";
 
 const ReadMail = ({type}) => {
 
@@ -18,6 +18,7 @@ const ReadMail = ({type}) => {
     const [toast, setToast] = useState({
         show: false, variant: "", message: "", textColor: ""
     })
+    const { markAsRead } = useMailApi(BASE_URL);
 
     useEffect(() => {
         const fetchMail = async () => {
@@ -27,12 +28,8 @@ const ReadMail = ({type}) => {
                 const data = await response.json();
                 setMail(data);
 
-                if (type === "inbox" && !data.read) {
-                    await fetch(`${BASE_URL}/mails/${safeEmail}/inbox/${id}.json`, {
-                        method: 'PATCH',
-                        headers: { 'Content-type': 'application/json' },
-                        body: JSON.stringify({ read: true }),
-                    });
+                if (type === "inbox" && data && !data.read) {
+                    await markAsRead(`mails/${safeEmail}/inbox/${id}`);
                 }
             } catch (error) {
                 setToast({
