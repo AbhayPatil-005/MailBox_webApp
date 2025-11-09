@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 const NavBar = () => {
     const dispatch = useDispatch();
     const userEmail =  useSelector((state)=>state.auth.userEmailId);
+    const isLoggedIn = useSelector((state)=>state.auth.isLoggedIn);
     const logoutHandler=()=>{
         dispatch(logout())
     }
@@ -15,10 +16,10 @@ const NavBar = () => {
                 <Navbar.Brand className="fw-bold fs-5">Mail-Box</Navbar.Brand>
 
                 <div className="ms-auto d-flex align-items-center gap-3">
-                    <span className="text-muted small">{userEmail}</span>
-                    <Button variant="outline-danger" size="sm" onClick={logoutHandler}>
+                    {isLoggedIn && <span className="text-muted small">{userEmail}</span>}
+                    {isLoggedIn && <Button variant="outline-danger" size="sm" onClick={logoutHandler}>
                         Logout
-                    </Button>
+                    </Button>}
                 </div>
             </Container>
         </Navbar>

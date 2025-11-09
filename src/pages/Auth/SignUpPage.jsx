@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Form, Button, Container, Card, Col, Row, Alert, Spinner } from "react-bootstrap";
 import { NavLink, useNavigate } from "react-router-dom";
+import NavBar from "../../components/Layout/NavBar";
 
 const SignUpPage = () => {
 
@@ -16,11 +17,11 @@ const SignUpPage = () => {
     const navigate = useNavigate();
 
     const handleChange = (e) => {
-        const {name, value} = e.target;
-        setFormData({...formData, [name]:value})
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value })
     }
 
-    const handleSubmit= async(e)=>{
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const errorMap = {
             EMAIL_EXISTS: "This email is already registered.",
@@ -30,44 +31,46 @@ const SignUpPage = () => {
         setError("");
         setSuccess("");
 
-        if(formData.password!== formData.confirmPassword){
+        if (formData.password !== formData.confirmPassword) {
             setError("Passwords do not match!");
-            setFormData({...formData, confirmPassword:""});
+            setFormData({ ...formData, confirmPassword: "" });
             return;
         }
         setLoading(true);
-        try{
-            const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY} `,{
-                method:'POST',
-                headers:{'Content-type':'application/json'},
+        try {
+            const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY} `, {
+                method: 'POST',
+                headers: { 'Content-type': 'application/json' },
                 body: JSON.stringify({
-                    email:formData.email,
+                    email: formData.email,
                     password: formData.password,
-                    returnSecureToken:true,
-                }),      
+                    returnSecureToken: true,
+                }),
             })
             const data = await response.json();
-            if(!response.ok){
+            if (!response.ok) {
                 setLoading(false);
                 throw new Error(data.error.message);
             }
             setSuccess("User Successfully registered");
-            setFormData({email: "", password: "", confirmPassword: "",});
-            setTimeout(()=>setSuccess(""), 3000);
+            setFormData({ email: "", password: "", confirmPassword: "", });
+            setTimeout(() => setSuccess(""), 3000);
             navigate("/login")
-              
-        }catch(err){
+
+        } catch (err) {
             const readError = (errorMap[err.message] || "Authentication failed due to some reasons, please try again!")
             setError(readError)
             setTimeout(() => setError(""), 3000);
-            console.error("Failed to post auth details: ",err)
-        }finally{
+            console.error("Failed to post auth details: ", err)
+        } finally {
             setLoading(false);
         }
     }
 
     return (<>
-        <Container className="d-flex justify-content-center align-items-center min-vh-100 ">
+        <NavBar />
+        <h3 className="text-center m-3">Thank you for signing up! </h3>
+        <Container className="d-flex justify-content-center align-items-center ">
             <Row className="w-100 justify-content-center">
                 <Col xs={10} sm={8} md={5} lg={4}>
                     <Card className=" shadow-sm border w-100">
